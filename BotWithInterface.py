@@ -165,18 +165,27 @@ def unknown_command(m):
 def get_populars(counter=0):
     res = tmdb.TV()
     series_message = ''
-    res_pop = res.popular()['results'];
+    res_pop = res.popular()['results']
+    total_results = len(res_pop)
     #TODO: добавить обработку выхода за границы res_pop
-    for series_number in range(5):#range(len(res_pop)):
-        series_message += str(series_number+1 + 5*counter) + ': ' + \
-            res_pop[series_number + 5*counter]['name'] + '\n'
-    return series_message
+    if total_results > 5:
+        for series_number in range(5):#range(len(res_pop)):
+            series_message += str(series_number+1 + 5*counter) + ': ' + \
+                res_pop[series_number + 5*counter]['name'] + '\n'
+        return series_message
+    elif total_results > 0:
+        for series_number in range(total_results):
+            series_message += str(series_number+1 + 5*counter) + ': ' + \
+                res_pop[series_number + 5*counter]['name'] + '\n'
+        return series_message
+    else:
+        return 'Sorry, i\'ve found nothing.'
 
 #TODO: подумать над передачей всех результатов в ф-ю поэтапной печати
 def search_for(series_name, counter=0):
     tm_search = tmdb.Search()
     res_search = tm_search.tv(query = series_name)
-    total_results = res_search['total_results']
+    total_results = res_search['total_results'] - 5*counter
     res_search = res_search['results']
     search_message = 'What i\'ve found:\n'
     if total_results > 5:
