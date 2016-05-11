@@ -2,11 +2,16 @@
 import config
 import telebot
 import time
+import sys 
 import tmdbsimple as tmdb
 tmdb.API_KEY = 'ecd5e3611e31538dade6f2a1946d05c0'
+
+reload(sys)
+sys.setdefaultencoding('utf-8')
 db_states = dict()
 db_counters = dict()
 db_searchs = dict()
+db_lists = dict()
 btnBack = telebot.types.KeyboardButton('Back')
 btnMenu = telebot.types.KeyboardButton('To Menu')
 
@@ -52,7 +57,10 @@ def listener(messages):
                 command_period_next(m)
             elif m.text == '1' or m.text == '2' or m.text == '3' or m.text == '4' or m.text == '5':
                 db_states.update({m.chat.id: 1111})
-                command_serial(m)
+                series_num = int(m.text) + db_counters.get(m.chat.id)*5 - 1
+                series_body = db_lists.get('pop')[series_num]
+                #bot.send_message(m.chat.id,'num='+str(series_num)+' len='+str(len(series_list)))
+                command_serial(m,series_body)
         elif db_states.get(m.chat.id) == 1111:
             if m.text == 'Back':
                 db_states.update({m.chat.id: 111})
@@ -65,18 +73,21 @@ def listener(messages):
                           
 def hello(m):
     markup = generate_markup_menu()
-    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам найти сериал, который можно посмотреть вместе и не вместе с Путиным, Абрамовичем и Гагариной. Выберите категорию для начала поиска.', reply_markup=markup)
+    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам \
+        найти сериал согласно актуальным для вас критериям. Выберите категорию\
+        для начала поиска.', reply_markup=markup)
 
 def command_get(m):
     bot.send_message(m.chat.id, str(m.chat.id)+" "+str(db[m.chat.id]))
 
 def command_help(m):
     markup = generate_markup_menu()
-    bot.send_message(m.chat.id, 'Ты отчаялся, раз обратился ко мне, смертный. Но я помогу тебе (нет).', reply_markup=markup)
+    bot.send_message(m.chat.id, 'Помощь в пути.', reply_markup=markup)
 
 def command_top(m):
     markup = generate_markup_period()
-    bot.send_message(m.chat.id, 'За какой период Вы хотите найти сериал?', reply_markup=markup)
+    bot.send_message(m.chat.id, 'За какой период Вы хотите найти сериал?', \
+        reply_markup=markup)
 
 def command_period(m):
     markup = generate_markup_serial()
@@ -96,9 +107,16 @@ def command_period_next(m):
     series = get_populars(db_counters.get(m.chat.id))
     bot.send_message(m.chat.id, series, reply_markup=markup)
 
-def command_serial(m):
+def command_serial(m, series_body):
     markup = generate_markup_seasons()
-    bot.send_message(m.chat.id, 'Выход первой серии: 17.04.2011\nОписание: Много крови, убийств, насилия и секса. И парочка драконов.\nhttp://www.imdb.com/title/tt0944947/', reply_markup=markup)
+    message = ''
+    #series_body
+    message = series_body['name'] + \
+        '\nДата выхода первой серии: ' + series_body['first_air_date'] + \
+        '\nОписание: '+series_body['overview']
+        
+    bot.send_message(m.chat.id, message)
+    #bot.send_message(m.chat.id, 'Выход первой серии: 17.04.2011\nОписание: Много крови, убийств, насилия и секса. И парочка драконов.\nhttp://www.imdb.com/title/tt0944947/', reply_markup=markup)
 
 def command_search(m):
     markup = generate_markup_serial()
@@ -162,11 +180,16 @@ def unknown_command(m):
     markup = generate_markup_menu()
     bot.send_message(m.chat.id, 'Неизвестная команда.', reply_markup=markup)
 
+def get_top_rated(counter=0):
+    res = tmdb.TV()
+    res_top = res.top_rated()['results']
+    
 def get_populars(counter=0):
     res = tmdb.TV()
     series_message = ''
     res_pop = res.popular()['results']
-    total_results = len(res_pop)
+    total_results = len(res_pop) - 5*counter
+    db_lists.update({'pop':res_pop})
     #TODO: добавить обработку выхода за границы res_pop
     if total_results > 5:
         for series_number in range(5):#range(len(res_pop)):
@@ -187,6 +210,7 @@ def search_for(series_name, counter=0):
     res_search = tm_search.tv(query = series_name)
     total_results = res_search['total_results'] - 5*counter
     res_search = res_search['results']
+    db_lists.update({'search':res_search})
     search_message = 'What i\'ve found:\n'
     if total_results > 5:
         for series_number in range(5):
