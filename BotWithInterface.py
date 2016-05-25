@@ -6,8 +6,8 @@ import sys
 import tmdbsimple as tmdb
 tmdb.API_KEY = 'ecd5e3611e31538dade6f2a1946d05c0'
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+#reload(sys)
+#sys.setdefaultencoding('utf-8')
 db_states = dict()
 db_counters = dict()
 db_searchs = dict()
@@ -18,51 +18,66 @@ btnMenu = telebot.types.KeyboardButton('To Menu')
 def listener(messages):
     for m in messages:
         try:
-            if m.text == '/start':
-                db_states.update({m.chat.id: 1})
-                hello(m)
-            elif db_states.get(m.chat.id) == None:
-                db_states.update({m.chat.id: 1})
-                hello(m)
+            if m.text == '/start' or db_states.get(m.chat.id) == None:
+                db_states.update({m.chat.id: 'm'})
+                command_master(m)
             elif m.text == 'get':
                 command_get(m)
             elif m.text == 'To Menu':
-                db_states.update({m.chat.id: 1})
+                db_states.update({m.chat.id: 'm'})
                 hello(m)
-            elif db_states.get(m.chat.id) == 1:
+            elif m.text == 'Back':
+                db_states.update({m.chat.id: db_states.get(m.chat.id)[0:len(db_states.get(m.chat.id))-1]})
+                command_master(m)
+            else:
+                command_master(m)
+        except Exception:
+            db_states.update({m.chat.id: 'm'})
+            bot.send_message(m.chat.id, 'Ошибка. Возвращаюсь в меню...', \
+                reply_markup = generate_markup_menu)
+
+def command_master(m):
+    try:
+        if m.text == 'Back':
+            if db_states.get(m.chat.id) == 'm':
+                hello(m)
+            elif db_states.get(m.chat.id) == 'mp': #popular series
+                command_pop(m)
+            elif db_states.get(m.chat.id) == 'mt': #top rated series
+                command_pop(m)
+            elif db_states.get(m.chat.id) == 'mtm': #top rated series
+                command_period(m, 'top')
+            elif db_states.get(m.chat.id) == 'mpm': #popular series
+                command_period(m, 'pop')
+            elif db_states.get(m.chat.id) == 'ms':
+                db_states.update({m.chat.id: 'm'})
+                hello(m)
+        else:
+            if db_states.get(m.chat.id) == 'm':
                 if m.text == 'Help':
                     command_help(m)
                 elif m.text == 'Hot' or m.text == 'Best':
-                    db_states.update({m.chat.id: 11})
+                    db_states.update({m.chat.id: 'mp'})
                     command_pop(m)
                 elif m.text == 'Top':
-                    db_states.update({m.chat.id: 12})
-                    command_pop(m)
+                    db_states.update({m.chat.id: 'mt'})
+                    command_top(m)
                 #SEARCH
                 else:
-                    db_states.update({m.chat.id: 13})
+                    db_states.update({m.chat.id: 'ms'})
                     db_searchs.update({m.chat.id: m.text})
                     command_search(m)
-                #unknown_command(m)
-            elif db_states.get(m.chat.id) == 11: #popular series
+                    #unknown_command(m)
+            elif db_states.get(m.chat.id) == 'mp': #popular series
                 if m.text == 'By month' or m.text == 'By year':
-                    db_states.update({m.chat.id: 111})
+                    db_states.update({m.chat.id: 'mpm'})
                     command_period(m, 'pop')
-                elif m.text == 'Back':
-                    db_states.update({m.chat.id: 1})
-                    hello(m)
-            elif db_states.get(m.chat.id) == 12: #top rated series
+            elif db_states.get(m.chat.id) == 'mt': #top rated series
                 if m.text == 'By month' or m.text == 'By year':
-                    db_states.update({m.chat.id: 121})
+                    db_states.update({m.chat.id: 'mtm'})
                     command_period(m, 'top')
-                elif m.text == 'Back':
-                    db_states.update({m.chat.id: 1})
-                    hello(m)
-            elif db_states.get(m.chat.id) == 121: #top rated series
-                if m.text == 'Back':
-                    db_states.update({m.chat.id: 11})
-                    command_pop(m) #identical command for both top and popular
-                elif m.text == 'Prev':
+            elif db_states.get(m.chat.id) == 'mtm': #top rated series
+                if m.text == 'Prev':
                     command_period_prev(m,'top')
                 elif m.text == 'Next':
                     command_period_next(m,'top')
@@ -72,11 +87,8 @@ def listener(messages):
                     series_body = db_lists.get('top')[series_num]
                     #bot.send_message(m.chat.id,'num='+str(series_num)+' len='+str(len(series_list)))
                     command_serial(m, series_body)
-            elif db_states.get(m.chat.id) == 111: #popular series
-                if m.text == 'Back':
-                    db_states.update({m.chat.id: 11})
-                    command_pop(m)
-                elif m.text == 'Prev':
+            elif db_states.get(m.chat.id) == 'mpm': #popular series
+                if m.text == 'Prev':
                     command_period_prev(m, 'pop')
                 elif m.text == 'Next':
                     command_period_next(m, 'pop')
@@ -86,34 +98,23 @@ def listener(messages):
                     series_body = db_lists.get('pop')[series_num]
                     #bot.send_message(m.chat.id,'num='+str(series_num)+' len='+str(len(series_list)))
                     command_serial(m, series_body)
-            elif db_states.get(m.chat.id) == 1111:
-                if m.text == 'Back':
-                    db_states.update({m.chat.id: 111})
-                    command_period(m, 'pop')
-            elif db_states.get(m.chat.id) == 1211:
-                if m.text == 'Back':
-                    db_states.update({m.chat.id: 121})
-                    command_period(m, 'top')
-            elif db_states.get(m.chat.id) == 13:
+            elif db_states.get(m.chat.id) == 'ms':
                 if m.text == 'Prev':
                     command_search_prev(m)
                 elif m.text == 'Next':
                     command_search_next(m)
-                elif m.text == 'Back' or m.text == 'To Menu':
-                    db_states.update({m.chat.id: 1})
-                    hello(m)
                 elif m.text == '1' or m.text == '2' or m.text == '3' or m.text == '4' or m.text == '5':
                     series_num = int(m.text) + db_counters.get(m.chat.id)*5 - 1
                     series_body = db_lists.get('search')[series_num]
                     command_serial(m, series_body)
-        except Exception:
-            db_states.update({m.chat.id: 1})
-            bot.send_message(m.chat.id, 'Ошибка. Возвращаюсь в меню...', \
-                reply_markup = generate_markup_menu)
-                          
+    except Exception:
+        db_states.update({m.chat.id: 'm'})
+        bot.send_message(m.chat.id, 'Ошибка. Возвращаюсь в меню...', \
+            reply_markup = generate_markup_menu)
+    
 def hello(m):
     markup = generate_markup_menu()
-    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам \
+    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам\
         найти сериал согласно актуальным для Вас критериям. Выберите категорию\
         для начала поиска или введите поисковой запрос.', reply_markup=markup)
 
@@ -126,9 +127,14 @@ def command_help(m):
 
 def command_pop(m):
     markup = generate_markup_period()
-    bot.send_message(m.chat.id, 'За какой период Вы хотите найти сериал?', \
+    bot.send_message(m.chat.id, 'Категория "Популярные".\nЗа какой период Вы хотите найти сериал?', \
         reply_markup=markup)
-
+    
+def command_top(m):
+    markup = generate_markup_period()
+    bot.send_message(m.chat.id, 'Категория "Топ".\nЗа какой период Вы хотите найти сериал?', \
+        reply_markup=markup)
+    
 def command_period(m, criterion):
     markup = generate_markup_serial()
     db_counters.update({m.chat.id: 0})
