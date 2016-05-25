@@ -56,7 +56,7 @@ def command_master(m):
             if db_states.get(m.chat.id) == 'm':
                 if m.text == 'Help':
                     command_help(m)
-                elif m.text == 'Hot' or m.text == 'Best':
+                elif m.text == 'Hot':# or m.text == 'Best':
                     db_states.update({m.chat.id: 'mp'})
                     command_pop(m)
                 elif m.text == 'Top':
@@ -208,7 +208,7 @@ def generate_markup_menu():
     markup = types.ReplyKeyboardMarkup(row_width=1,one_time_keyboard=True)
     btnTop = types.KeyboardButton('Top')
     btnHot = types.KeyboardButton('Hot')
-    btnBest = types.KeyboardButton('Best')
+    #btnBest = types.KeyboardButton('Best')
     btnHelp = types.KeyboardButton('Help')
     markup.add(btnTop, btnHot, btnBest, btnHelp)
     return markup
