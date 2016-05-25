@@ -210,7 +210,7 @@ def generate_markup_menu():
     btnHot = types.KeyboardButton('Hot')
     #btnBest = types.KeyboardButton('Best')
     btnHelp = types.KeyboardButton('Help')
-    markup.add(btnTop, btnHot, btnBest, btnHelp)
+    markup.add(btnTop, btnHot, btnHelp)
     return markup
 
 def generate_markup_period():
