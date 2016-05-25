@@ -114,8 +114,7 @@ def command_master(m):
     
 def hello(m):
     markup = generate_markup_menu()
-    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам найти сериал согласно актуальным для Вас критериям. Выберите категорию\
-        для начала поиска или введите поисковой запрос.', reply_markup=markup)
+    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам найти сериал согласно актуальным для Вас критериям. Выберите категорию для начала поиска или введите поисковой запрос.', reply_markup=markup)
 
 def command_get(m):
     bot.send_message(m.chat.id, str(m.chat.id)+" "+str(db[m.chat.id]))
