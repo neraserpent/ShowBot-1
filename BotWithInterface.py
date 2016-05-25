@@ -20,7 +20,7 @@ def listener(messages):
         try:
             if m.text == '/start' or db_states.get(m.chat.id) == None:
                 db_states.update({m.chat.id: 'm'})
-                command_master(m)
+                hello(m)
             elif m.text == 'get':
                 command_get(m)
             elif m.text == 'To Menu':
@@ -82,7 +82,7 @@ def command_master(m):
                 elif m.text == 'Next':
                     command_period_next(m,'top')
                 elif m.text == '1' or m.text == '2' or m.text == '3' or m.text == '4' or m.text == '5':
-                    #db_states.update({m.chat.id: 1211})
+                    db_states.update({m.chat.id: 'mtmd'})
                     series_num = int(m.text) + db_counters.get(m.chat.id)*5 - 1
                     series_body = db_lists.get('top')[series_num]
                     #bot.send_message(m.chat.id,'num='+str(series_num)+' len='+str(len(series_list)))
@@ -93,7 +93,7 @@ def command_master(m):
                 elif m.text == 'Next':
                     command_period_next(m, 'pop')
                 elif m.text == '1' or m.text == '2' or m.text == '3' or m.text == '4' or m.text == '5':
-                    #db_states.update({m.chat.id: 1111})
+                    db_states.update({m.chat.id: 'mpmd'})
                     series_num = int(m.text) + db_counters.get(m.chat.id)*5 - 1
                     series_body = db_lists.get('pop')[series_num]
                     #bot.send_message(m.chat.id,'num='+str(series_num)+' len='+str(len(series_list)))
@@ -114,8 +114,7 @@ def command_master(m):
     
 def hello(m):
     markup = generate_markup_menu()
-    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам\
-        найти сериал согласно актуальным для Вас критериям. Выберите категорию\
+    bot.send_message(m.chat.id, 'Вас приветсвует IMDb-бот. Он поможет Вам найти сериал согласно актуальным для Вас критериям. Выберите категорию\
         для начала поиска или введите поисковой запрос.', reply_markup=markup)
 
 def command_get(m):
