@@ -6,8 +6,8 @@ import sys
 import tmdbsimple as tmdb
 tmdb.API_KEY = 'ecd5e3611e31538dade6f2a1946d05c0'
 
-#reload(sys)
-#sys.setdefaultencoding('utf-8')
+reload(sys)
+sys.setdefaultencoding('utf-8')
 db_states = dict()
 db_counters = dict()
 db_searchs = dict()
@@ -180,6 +180,8 @@ def command_serial(m, series_body):
     message = series_body['name'] + \
         '\nДата выхода первой серии: ' + series_body['first_air_date'] + \
         '\nОписание: '+series_body['overview']
+    message = message + '\nhttp://image.tmdb.org/t/p/w500' + \
+        series_body['poster_path']
         
     bot.send_message(m.chat.id, message, reply_markup = markup)
     #bot.send_message(m.chat.id, 'Выход первой серии: 17.04.2011\nОписание: Много крови, убийств, насилия и секса. И парочка драконов.\nhttp://www.imdb.com/title/tt0944947/', reply_markup=markup)
